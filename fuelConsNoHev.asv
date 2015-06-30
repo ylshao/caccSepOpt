@@ -182,8 +182,7 @@ for iW = 1:numel(wVehList)
 %                 debug = 1;
 %             end
             
-            % find the minimum fuel consumption in the valid portion of
-            % constant power curve
+            % the fuel 
             fuelConsPlot(iWDot, iW) = nanmin(fuelConsResamp);
 
 %             if iW == 1 && iWDot == 1
@@ -196,7 +195,7 @@ for iW = 1:numel(wVehList)
     end
 end
 
-%% Plotting
+%%
 vVehPlotMph = wVehPlot*Rtire*3600/1000/MPH_2_KMPH;
 aVehPlot = wDotVehPlot*Rtire;
 figure;
