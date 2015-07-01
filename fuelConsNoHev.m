@@ -105,14 +105,15 @@ fprintf('---------------------------------------------------------\n')
 wVehPlot = nan(WDOT_LIST_LEN, W_LIST_LEN);
 wDotVehPlot = nan(WDOT_LIST_LEN, W_LIST_LEN);
 fuelConsPlot = nan(WDOT_LIST_LEN, W_LIST_LEN);
+pVVehPlot = nan(WDOT_LIST_LEN, W_LIST_LEN);
 for iW = 1:numel(wVehList)       
     % get the max and min vehicle angular acceleration for current vehicle
     % angular velocity. The wDotVeh cannot be larger than the maximum
     % acceleration that the engine can generate under current velocity.
     wDotVehMaxCur = interp1(wVehSpan, wDotVehMaxSpan, wVehList(iW), 'pchip');
     wDotVehMinCur = interp1(wVehSpan, wDotVehMinSpan, wVehList(iW), 'pchip');
-    wDotVehList = linspace(-WDOT_VEH_MAX, wDotVehMaxCur, WDOT_LIST_LEN);
-
+    wDotVehList = linspace(-WDOT_VEH_MAX, wDotVehMaxCur, WDOT_LIST_LEN); %  full map
+%     wDotVehList = linspace(0, wDotVehMaxCur, WDOT_LIST_LEN); % only positive map
     for iWDot = 1:numel(wDotVehList)
         % get current wVeh and current wDotVeh
         wVeh = wVehList(iW);
@@ -129,12 +130,12 @@ for iW = 1:numel(wVehList)
         
         % calculate vehicle request torque. TRAN_EFF to ensure that it
         % requires more torque to consider the transmission efficiency
-        tVeh = (ftire*Mv*g*cos(phi) + 0.5*rou*Cd*Atire*Rtire^2*wVeh^2 + Mv*wDotVeh*Rtire)*Rtire*1/TRAN_EFF;
+        tVeh = (ftire*Mv*g*cos(phi) + Mv*g*sin(phi) + 0.5*rou*Cd*Atire*Rtire^2*wVeh^2 + Mv*wDotVeh*Rtire)*Rtire*1/TRAN_EFF;
         
         % display current wVeh and current wDotVeh
         fprintf('wVeh %d, wDotVeh %d, pReq %8.4f\n',...
             iW, iWDot, tVeh*wVeh)
-        
+        pVVehPlot(iWDot, iW) = tVeh*wVeh;
         % if power request is smaller than the minimum engine output power,
         % this means that the brake must kicks in. so assume the fuel
         % consumption rate is the fuel cons of min engine operating point
@@ -205,4 +206,7 @@ xlabel('vehicle speed [mph]')
 ylabel('Vehicle Acceleration [m/s^2]')
 zlabel('fuel consumption [g/s]')
 
-save('fuelConsMap_fullAVeh_150629', 'vVehPlotMph', 'aVehPlot', 'fuelConsPlot', 'wDotVehMaxSpan', 'wDotVehMinSpan')
+% % save('fuelConsMap_fullAVeh_150629', 'vVehPlotMph', 'aVehPlot', 'fuelConsPlot', 'wDotVehMaxSpan', 'wDotVehMinSpan')
+save('fuelConsMap_fullAVeh_150701', 'vVehPlotMph', 'aVehPlot', ...
+    'fuelConsPlot', 'wDotVehMaxSpan', 'wDotVehMinSpan', 'wVehSpan', ...
+    'Rtire', 'MPH_2_KMPH', 'pVVehPlot')
